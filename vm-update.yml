@@ -1,0 +1,41 @@
+
+---
+- name: Debian Server aktualisieren
+  hosts: all
+  become: true
+  gather_facts: true
+  serial: 1
+
+  tasks:
+    - name: Debian Betriebssystem überprüfen
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "Dieses Playbook ist nur für Debian vorgesehen."
+
+    - name: Paketlisten aktualisieren
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 0
+        lock_timeout: 300
+
+    - name: Alle verfügbaren Updates installieren
+      ansible.builtin.apt:
+        upgrade: safe
+        lock_timeout: 300
+
+    - name: Nicht benötigte Pakete entfernen
+      ansible.builtin.apt:
+        autoremove: true
+
+    - name: Paketcache bereinigen
+      ansible.builtin.apt:
+        autoclean: true
+
+
+    - name: Update-Ergebnis ausgeben
+      ansible.builtin.debug:
+        msg: >-
+          {{ inventory_hostname }} wurde erfolgreich aktualisiert.
+          Neustart erforderlich:
+          {{ 'JA' if reboot_required.stat.exists else 'NEIN' }}
