@@ -32,6 +32,10 @@
       ansible.builtin.apt:
         autoclean: true
 
+    - name: Neustart erforderlich prüfen
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_required
 
     - name: Update-Ergebnis ausgeben
       ansible.builtin.debug:
@@ -39,3 +43,4 @@
           {{ inventory_hostname }} wurde erfolgreich aktualisiert.
           Neustart erforderlich:
           {{ 'JA' if reboot_required.stat.exists else 'NEIN' }}
+
